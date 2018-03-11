@@ -1,8 +1,8 @@
 # -*- coding: iso-8859-1 -*-
 """
-    MoinMoin - memodump theme
+    MoinMoin - hal theme
 
-    Based on modernized theme in MoinMoin
+    Based on memodump theme in MoinMoin
 
     Config variables:
         Following variables and methods in wikiconfig.py will change something in the theme.
@@ -28,14 +28,14 @@
 """
 
 from MoinMoin.theme import ThemeBase
-import StringIO, re
+import StringIO, re, sys
 from MoinMoin import wikiutil
 from MoinMoin.action import get_available_actions
 from MoinMoin.Page import Page
 
 class Theme(ThemeBase):
 
-    name = "memodump"
+    name = "hal"
 
     _ = lambda x: x     # We don't have gettext at this moment, so we fake it
     icons = {
@@ -106,22 +106,25 @@ class Theme(ThemeBase):
         # media         basename
         ('all',         'bootstrap.min'),
         ('all',         'bootstrap-theme.min'),
-        ('all',         'memodump'),
+        ('all',         'hal'),
         ('all',         'moinizer'),
+        ('all',         'bigfoot-number'),
     )
     stylesheets_print = (
         ('all',         'bootstrap.min'),
         ('all',         'bootstrap-theme.min'),
-        ('all',         'memodump'),
+        ('all',         'hal'),
         ('all',         'moinizer'),
         ('all',         'memoprint'),
+        ('all',         'bigfoot-number'),
     )
     stylesheets_projection = (
         ('all',         'bootstrap.min'),
         ('all',         'bootstrap-theme.min'),
-        ('all',         'memodump'),
+        ('all',         'hal'),
         ('all',         'moinizer'),
         ('all',         'memoslide'),
+        ('all',         'bigfoot-number'),
     )
 
     def header(self, d, **kw):
@@ -155,7 +158,7 @@ class Theme(ThemeBase):
             <span class="icon-bar"></span>
           </button>
           <!-- Sitename -->
-%(sitename)s
+	%(sitename)s
         </div> <!-- /.navbar-header -->
 
         <!-- Body of navbar -->
@@ -276,6 +279,10 @@ class Theme(ThemeBase):
   <script src="%(prefix)s/%(theme)s/js/bootstrap.min.js"></script>
   <!-- toggle.js by dossist -->
   <script src="%(prefix)s/%(theme)s/js/toggle.js"></script>
+  <script type="text/javascript" src="%(prefix)s/%(theme)s/js/bigfoot.min.js"></script>
+  <script type="text/javascript">
+    $.bigfoot();
+  </script>
   <!-- Custom script -->
 %(script)s
   <!-- End of JavaScript -->
@@ -369,7 +376,7 @@ class Theme(ThemeBase):
             html = page.link_to_raw(self.request, self.cfg.logo_string, css_class="navbar-brand")
             html = u'''
           <div class="navbar-brand-wrapper">
-            %s
+            %s 
           </div>
           ''' % html
         return html
@@ -981,7 +988,23 @@ class Theme(ThemeBase):
             page.send_page(content_only=1, content_id="sidebar-content")
         finally:
             self.request.redirect()
-        return u'<div class="sidebar clearfix">%s</div>' % buffer.getvalue()
+        sidebar_html_no_dropdown = buffer.getvalue()
+        sidebar_html_no_dropdown = sidebar_html_no_dropdown.replace('<p class="line891">',"")
+        sidebar_html_no_dropdown = sidebar_html_no_dropdown.replace('</p>',"")
+        cats = sidebar_html_no_dropdown.split("li>")
+        sidebar_html_dropdown = cats[0]
+        for cat in cats[1:]:
+            has_nested = cat[-1]!='/'
+            sys.stderr.write(cat+'\n')
+            sys.stderr.write(str(has_nested))
+            if has_nested:
+                cat = cat.replace('nonexistent"','dropdown-toggle" data-toggle="dropdown"')
+                cat = cat.replace('</a>',' <b class="caret"></b></a>')
+                cat = cat.replace('<ul>',' <ul class="dropdown-menu">')
+                sidebar_html_dropdown+='li class="dropdown">\n'+cat
+            else:
+                sidebar_html_dropdown+='li>\n'+cat
+        return u'<div class="sidebar clearfix">%s</div>' % sidebar_html_dropdown
 
     def trail(self, d):
         """ Assemble page trail
