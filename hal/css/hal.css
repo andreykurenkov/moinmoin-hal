@@ -1095,3 +1095,33 @@ pre {
 .menu-btn-sidebar-toggler.on:before {
     content: "\e079"; /* .glyphicon-chevron-left */
 }
+
+.navbar.navbar-inverse {
+    border-width: 0;
+    background: #4A6171;
+}
+.nav.navbar-nav.navbar-right li a {
+    color: #E8FEF2;
+}
+.nav.navbar-nav.navbar-right li a:hover {
+    color: #AACFD7;
+}
+.nav.navbar-nav.navbar-right .dropdown-menu > li a {
+    color: #7BAABC;
+}
+.nav.navbar-nav.navbar-right .dropdown-menu > li a:hover {
+    color: #AACFD7;
+}
+.navbar-brand > img {
+    height: 100%;
+    padding-left: 10px;
+}
+#The_AI_Wiki {
+    margin-left: 0.5em;
+    color: #E8FEF2;
+}
+.navbar-brand {
+    display: flex;
+    align-content: center;
+    align-items: center;
+}
