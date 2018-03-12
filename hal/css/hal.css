@@ -741,7 +741,7 @@ pre {
     padding-top: 0px;
 }
 #sidebar {
-    padding-top: 40px;
+    padding-top: 20px;
     padding-bottom: 20px;
 }
 #contentbox {
@@ -1116,7 +1116,7 @@ pre {
     height: 100%;
     padding-left: 10px;
 }
-#The_AI_Wiki {
+h4#The_AI_Wiki {
     margin-left: 0.5em;
     color: #E8FEF2;
 }
@@ -1124,4 +1124,20 @@ pre {
     display: flex;
     align-content: center;
     align-items: center;
+}
+
+.sidebar-row {
+  display: flex;
+  align-items: center;
+  align-content: center;
+}
+
+.sidebar-label {
+  flex-grow: 1;
+  white-space: nowrap;
+}
+
+.sidebar-arrow {
+  flex-grow: 0;
+  border-left: 1px solid black;
 }
