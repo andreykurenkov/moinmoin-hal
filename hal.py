@@ -192,10 +192,10 @@ class Theme(ThemeBase):
       <div class="sidebar-toggle" id="sidebar-curtain">
         <div class="sidebar-toggle" id="sidebar-mover">
           <div class="sidebar-toggle" id="sidebar" role="navigation">
-<!-- SideBar contents -->
-%(sidebar)s
 <!-- End of SideBar contents -->
 %(navilinks)s
+<!-- SideBar contents -->
+%(sidebar)s
 %(trail)s
           </div> <!-- /#sidebar -->
         </div> <!-- /#sidebar-mover -->
@@ -283,6 +283,16 @@ class Theme(ThemeBase):
   <script type="text/javascript">
     $.bigfoot();
   </script>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-114440651-2"></script>
+  <script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-114440651-2');
+  </script>
+
   <!-- Custom script -->
 %(script)s
   <!-- End of JavaScript -->
@@ -401,7 +411,9 @@ class Theme(ThemeBase):
 %(pagename)s
           %(lastupdate)s
         </div>
-''' % {'interwiki': self.interwiki(d), 'pagename': self.title(d), 'lastupdate': self.lastupdate(d), }
+''' % {'interwiki': self.interwiki(d), 
+       'pagename': '<h4>'+self.title(d)+'</h4>', 
+       'lastupdate': self.lastupdate(d), }
         return html
 
     def interwiki(self, d):
@@ -649,10 +661,7 @@ class Theme(ThemeBase):
                 'RecentChanges',
                 'FindPage',
                 'LocalSiteMap',
-                '__separator__',
-                '===== Help =====',
                 'HelpContents',
-                'HelpOnMoinWikiSyntax',
                 '__separator__',
                 '===== Display =====',
                 'AttachFile',
@@ -668,7 +677,6 @@ class Theme(ThemeBase):
                 'Load',
                 'Save',
                 'Despam',
-                'editSideBar',
                 '__separator__',
                 '===== User =====',
                 'quicklink',
@@ -993,15 +1001,16 @@ class Theme(ThemeBase):
         sidebar_html_no_dropdown = sidebar_html_no_dropdown.replace('</p>',"")
         cats = sidebar_html_no_dropdown.split("li>")
         sidebar_html_dropdown = cats[0]
-        for cat in cats[1:]:
+        for i,cat in enumerate(cats[1:]):
             has_nested = cat[-1]!='/'
-            sys.stderr.write(cat+'\n')
-            sys.stderr.write(str(has_nested))
             if has_nested:
-                cat = cat.replace('nonexistent"','dropdown-toggle" data-toggle="dropdown"')
-                cat = cat.replace('</a>',' <b class="caret"></b></a>')
-                cat = cat.replace('<ul>',' <ul class="dropdown-menu">')
-                sidebar_html_dropdown+='li class="dropdown">\n'+cat
+                cat = cat.replace('<a class="nonexistent"',
+                                  '<div class="sidebar-row"><a class="sidebar-label"')
+                cat = cat.replace('</a>',('</a><a href="#collapse%d" '
+                                          'data-toggle="collapse" class="sidebar-arrow">'
+                                          '<b class="caret"></b></a></div>'%i))
+                cat = cat.replace('<ul>',' <ul class="collapse" id="collapse%d">'%i)
+                sidebar_html_dropdown+='li>\n'+cat
             else:
                 sidebar_html_dropdown+='li>\n'+cat
         return u'<div class="sidebar clearfix">%s</div>' % sidebar_html_dropdown
@@ -1110,7 +1119,7 @@ class Theme(ThemeBase):
 
         # Process config navi_bar
         if request.cfg.navi_bar:
-            for text in request.cfg.navi_bar:
+            for text in ['Home','About']+request.cfg.navi_bar:
                 pagename, link = self.splitNavilink(text)
                 if pagename == current:
                     cls = 'wikilink active'
@@ -1131,14 +1140,6 @@ class Theme(ThemeBase):
                     cls = 'userlink'
                 items.append(item % (cls, link))
                 found[pagename] = 1
-
-        # Add current page at end of local pages
-#       if not current in found:
-#           title = d['page'].split_title()
-#           title = self.shortenPagename(title)
-#           link = d['page'].link_to(request, title)
-#           cls = 'active'
-#           items.append(item % (cls, link))
 
         # Add sister pages.
         for sistername, sisterurl in request.cfg.sistersites:
